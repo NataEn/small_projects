@@ -31,38 +31,22 @@ class App extends Component {
           newRow.fruit = " ";
           newRow.price = " ";
           this.setState({ data: [...this.state.data, newRow] });
-          console.log(
-            "in app component addRow action=>the state is: " +
-              JSON.stringify(this.state.data),
-            "the action is: " + JSON.stringify(action)
-          );
+
           return this.state.data;
         case "deleteRow":
           //this delets different rows only
           let new_state = this.state.data.filter(
             row => row.id !== action.row || row.fruit !== action.fruit
           );
-          console.log(
-            "in app component, deleteRow action the state is: " +
-              JSON.stringify(new_state),
-            "the action is: " + JSON.stringify(action)
-          );
+
           this.setState({ data: [...new_state] });
           return this.state.data;
         default:
-          console.log(
-            "in app component, returning data action the state is: " +
-              JSON.stringify(this.state.data),
-            "the action is: " + JSON.stringify(action)
-          );
           return this.state.data;
       }
     }
   };
   render() {
-    console.log(
-      "from app componenet the state is: " + JSON.stringify(this.state.data)
-    );
     return (
       <div className="App">
         <RenderExpenseTable data={this.state.data} prices={this.prices} />
@@ -78,15 +62,11 @@ class RenderExpenseTable extends Component {
   }
   componentWillMount() {
     if (!this.state.data.length) {
-      console.log("in table component, componentWillMount data is empty");
       this.setState({ data: [...this.props.prices({ action: "data" })] });
-    } else console.log("in table data is not empty");
+    }
   }
 
   render() {
-    console.log(
-      "in table data is rendered: " + JSON.stringify(this.state.data)
-    );
     let tableData = this.state.data;
     if (JSON.stringify(this.props.data) === JSON.stringify(tableData)) {
       console.log("in rendered table components the new data is: updated ");
