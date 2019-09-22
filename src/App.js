@@ -3,7 +3,6 @@ import BootstrapTable from "react-bootstrap-table-next";
 import cellEditFactory from "react-bootstrap-table2-editor";
 import ToolkitProvider, { CSVExport } from "react-bootstrap-table2-toolkit";
 import "./App.css";
-import { newExpression } from "@babel/types";
 
 const { ExportCSVButton } = CSVExport;
 const pricesData = [
@@ -33,21 +32,26 @@ class App extends Component {
           newRow.price = " ";
           this.setState({ data: [...this.state.data, newRow] });
           console.log(
-            "addRow action=>the state is: " + JSON.stringify(this.state.data),
+            "in app component addRow action=>the state is: " +
+              JSON.stringify(this.state.data),
             "the action is: " + JSON.stringify(action)
           );
           return this.state.data;
         case "deleteRow":
-          let new_state = this.state.data.filter(row => row.id !== action.row);
+          //this delets different rows only
+          let new_state = this.state.data.filter(
+            row => row.id !== action.row || row.fruit !== action.fruit
+          );
           console.log(
-            " deleteRow action the state is: " + JSON.stringify(new_state),
+            "in app component, deleteRow action the state is: " +
+              JSON.stringify(new_state),
             "the action is: " + JSON.stringify(action)
           );
           this.setState({ data: [...new_state] });
           return this.state.data;
         default:
           console.log(
-            " return data action the state is: " +
+            "in app component, returning data action the state is: " +
               JSON.stringify(this.state.data),
             "the action is: " + JSON.stringify(action)
           );
@@ -57,8 +61,7 @@ class App extends Component {
   };
   render() {
     console.log(
-      "from main app componenet the state is: " +
-        JSON.stringify(this.state.data)
+      "from app componenet the state is: " + JSON.stringify(this.state.data)
     );
     return (
       <div className="App">
@@ -72,18 +75,25 @@ class RenderExpenseTable extends Component {
   constructor(props) {
     super(props);
     this.state = { data: [...this.props.data] };
-    //this.props.prices = this.props.prices.bind(this);
+  }
+  componentWillMount() {
+    if (!this.state.data.length) {
+      console.log("in table component, componentWillMount data is empty");
+      this.setState({ data: [...this.props.prices({ action: "data" })] });
+    } else console.log("in table data is not empty");
   }
 
-  componentDidMount(prevProps) {
-    if (!this.state.data.length) {
-      console.log("data is empty");
-      this.setState({ data: [...this.props.prices({ action: "data" })] });
-    } else console.log("data is not empty");
-  }
   render() {
-    console.log(" data is: " + JSON.stringify(this.state.data));
+    console.log(
+      "in table data is rendered: " + JSON.stringify(this.state.data)
+    );
     let tableData = this.state.data;
+    if (JSON.stringify(this.props.data) === JSON.stringify(tableData)) {
+      console.log("in rendered table components the new data is: updated ");
+    } else {
+      console.log("in rendered table components the new data is: not updated ");
+      tableData = this.props.data;
+    }
     const columns = [
       {
         dataField: "id",
@@ -110,7 +120,8 @@ class RenderExpenseTable extends Component {
                   this.setState(this.state.data, () => {
                     this.props.prices({
                       actionType: "deleteRow",
-                      row: row.id
+                      row: row.id,
+                      fruit: row.fruit
                     });
                   });
                 }}
@@ -161,12 +172,14 @@ class RenderExpenseTable extends Component {
                   mode: "click",
                   onStartEdit: (row, column, rowIndex, columnIndex) => {},
                   beforeSaveCell: (oldValue, newValue, row, column) => {
-                    if (isNaN(Number(newValue))) {
-                      alert(
-                        "You entered " +
-                          newValue +
-                          " Please Enter numbers Only!!"
-                      );
+                    if (column.dataField === "price") {
+                      if (isNaN(Number(newValue))) {
+                        alert(
+                          "You entered " +
+                            newValue +
+                            " Please Enter numbers Only!!"
+                        );
+                      }
                     }
                   },
                   afterSaveCell: (oldValue, newValue, row, column) => {}
